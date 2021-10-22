@@ -1,12 +1,13 @@
-# Airbnb
+# Airbnb Forecast Rental Prices
+
+
 
 library(tidyverse)
 library(leaps)
 library(caret)
 library(ggthemes)
 library(glmnet)
-# ensure analysisData.csv and scoringData.csv are in your working directory
-# Code will read data 
+
 analysisData = read.csv(file="~/Desktop/analysisData.csv", head = TRUE)
 scoringData = read.csv(file="~/Desktop/scoringData.csv", head = TRUE)
 
@@ -41,7 +42,6 @@ test$train_test_score <- "test"
 scoringData$train_test_score <- "score"
 baseData <- bind_rows(train,test,scoringData)
 
-# Begin Data Wrangling Process
 baseData$bed_type <- factor(baseData$bed_type)
 baseData$property_type <- factor(baseData$property_type)
 baseData$instant_bookable <- factor(baseData$instant_bookable)
@@ -130,7 +130,6 @@ baseData %>%
   mutate(test = coalesce(test, 0)) %>%
   mutate(train = coalesce(train, 0))
 
-# Next, which property_types should we look to move these orphaned types too (hint: anything that has some Train data)
 baseData %>% 
   count(property_type, train_test_score) %>% 
   group_by(property_type) %>% 
@@ -154,7 +153,6 @@ pt
 
 baseData$property_type_upd <- as.factor(pt$property_type_upd)
 
-# If Everything worked nothing should return
 baseData %>% 
   count(property_type_upd, train_test_score) %>% 
   group_by(property_type_upd) %>% 
