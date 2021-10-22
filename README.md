@@ -181,6 +181,9 @@ library(caret)
 
 ncol(analysisData)
 
+library(randomForest)
+set.seed(5656)
+
 #Tuned Ranger #189.1483
 trControl=trainControl(method="cv",number=5) #189.1483
 tuneGrid = expand.grid(mtry=1:3, 
