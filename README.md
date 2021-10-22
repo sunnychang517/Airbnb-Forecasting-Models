@@ -8,8 +8,9 @@ library(caret)
 library(ggthemes)
 library(glmnet)
 
-analysisData = read.csv(file="~/Desktop/analysisData.csv", head = TRUE)
-scoringData = read.csv(file="~/Desktop/scoringData.csv", head = TRUE)
+analysisData = read.csv("pathway", head = TRUE)
+
+scoringData = read.csv("pathway", head = TRUE)
 
 namevector <- c("price")
 scoringData[,namevector] <- 0
