@@ -10,6 +10,9 @@ For this project, you are given a listing of over <strong>35,000</strong> Airbnb
 3. Programming knowledge to troubleshoot if somethings goes wrong or to fill in the blanks
 4. Have fun learning!
 
+## Packages Used:
+`tidyverse` `leaps` `caret` `ggthemes` `glmnet` `caTools` `lattice` `ISLR` `dplyr` `ranger` `rpart` `randomForest` `mice`
+
 ## Acknowledgement: 
 This individual project was from my first programming class during my graduate studies back in 2021. </br>
 Professor: Grant Case
