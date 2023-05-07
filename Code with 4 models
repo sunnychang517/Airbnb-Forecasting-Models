@@ -1,0 +1,156 @@
+analysisData = read.csv(*train dataset*, head = TRUE)
+scoringData = read.csv(file="test dataset*", head = TRUE)
+namevector <- c("price")
+scoringData[,namevector] <- 0
+scoringData <- scoringData %>%
+ select(id,price, everything())
+all_equal(analysisData, scoringData, convert = TRUE)
+analysisData$zipcode <- as.character(analysisData$zipcode)
+scoringData$zipcode <- as.character(scoringData$zipcode)
+analysisData$host_is_superhost <- as.logical(analysisData$host_is_superhost)
+analysisData$host_has_profile_pic <- as.logical(analysisData$host_has_profile_pic)
+analysisData$host_identity_verified <- as.logical(analysisData$host_identity_verified)
+analysisData$instant_bookable <- as.logical(analysisData$instant_bookable)
+analysisData$require_guest_profile_picture <-
+as.logical(analysisData$require_guest_profile_picture)
+analysisData$require_guest_phone_verification <-
+as.logical(analysisData$require_guest_phone_verification)
+analysisData$is_location_exact <- as.logical(analysisData$is_location_exact)
+all_equal(analysisData, scoringData, convert = TRUE)
+set.seed(5656)
+ksplit <- createDataPartition(y = analysisData$price, p=.7, list=F, groups=50)
+train <- analysisData[ksplit,]
+test <- analysisData[-ksplit,]
+nrow(train)
+nrow(test)
+train$train_test_score <- "train"
+test$train_test_score <- "test"
+scoringData$train_test_score <- "score"
+baseData <- bind_rows(train,test,scoringData)
+
+# Begin Data Wrangling Process
+[Fill in the blanks]
+
+#Feature selection 
+subsets =
+leaps::regsubsets(price~*subset attributes*,data=train, nvmax=8) #best 5 predictors
+summary(subsets)
+names(summary(subsets))
+
+baseData %>% 
+ count(property_type, train_test_score) %>%
+ group_by(property_type) %>%
+ pivot_wider(names_from=train_test_score, values_from=c(n)) %>%
+ filter(is.na(train) || is.na(test) || is.na(score)) %>%
+ mutate(score = coalesce(score, 0)) %>%
+ mutate(test = coalesce(test, 0)) %>%
+ mutate(train = coalesce(train, 0))
+baseData %>%
+ count(property_type, train_test_score) %>%
+ group_by(property_type) %>%
+ pivot_wider(names_from=train_test_score, values_from=c(n)) %>%
+ filter(is.na(train) || is.na(test) || is.na(score)) %>%
+ filter(property_type == 'Cabin')
+baseData %>%
+ count(property_type, train_test_score) %>%
+ group_by(property_type) %>%
+ pivot_wider(names_from=train_test_score, values_from=c(n)) %>%
+ filter(is.na(train) || is.na(test) || is.na(score)) %>%
+ filter(property_type == 'Train')
+baseData %>%
+ count(property_type, train_test_score) %>%
+ group_by(property_type) %>%
+ pivot_wider(names_from=train_test_score, values_from=c(n)) %>%
+ filter(is.na(train) || is.na(test) || is.na(score)) %>%
+ filter(property_type == 'Farm stay')
+baseData %>%
+ count(property_type, train_test_score) %>%
+ group_by(property_type) %>%
+ pivot_wider(names_from=train_test_score, values_from=c(n)) %>%
+ filter(is.na(train)) %>%
+ mutate(score = coalesce(score, 0)) %>%
+ mutate(test = coalesce(test, 0)) %>%
+ mutate(train = coalesce(train, 0))
+# Next, which property_types should we look to move these orphaned types too (hint: anything
+that has some Train data)
+baseData %>%
+ count(property_type, train_test_score) %>%
+ group_by(property_type) %>%
+ pivot_wider(names_from=train_test_score, values_from=c(n))
+pt <- baseData %>%
+ select(property_type) %>%
+ mutate(property_type_char = as.character(property_type)) %>%
+ mutate(
+ property_type_upd = case_when(
+ property_type_char == "Barn" ~ "Earth house",
+ property_type_char == "Dorm" ~ "Hostel",
+ property_type_char == "Farm stay" ~ "Earth house",
+ property_type_char == "Yurt" ~ "Earth house",
+ property_type_char == "In-law" ~ "Apartment",
+ property_type_char == "Bus" ~ "Earth house",
+ property_type_char == "Train" ~ "Resort",
+ TRUE ~ property_type_char))
+pt
+baseData$property_type_upd <- as.factor(pt$property_type_upd)
+
+# If Everything worked nothing should return
+baseData %>%
+ count(property_type_upd, train_test_score) %>%
+ group_by(property_type_upd) %>%
+ pivot_wider(names_from=train_test_score, values_from=c(n)) %>%
+ filter(is.na(train)) %>%
+ mutate(score = coalesce(score, 0)) %>%
+ mutate(test = coalesce(test, 0)) %>%
+ mutate(train = coalesce(train, 0))
+train <- baseData %>%
+ filter(train_test_score == "train")
+test <- baseData %>%
+ filter(train_test_score == "test")
+score <- baseData %>%
+ filter(train_test_score == "score")
+nrow(analysisData); nrow(train); nrow(test); nrow(score)
+
+#Decision Tree #RMSE: 185.7574
+tree = rpart(price~bathrooms+accommodates+cleaning_fee,data=train,
+ control=rpart.control(*tune parameters*)
+pred_tree = predict(*test set*)
+rmse_tree = sqrt(mean((pred_tree-scoringData$price)^2))
+rmse_tree
+*Graph tree with nodes*
+
+#Random forest #RMSE: 190.856
+set.seed(5656)
+forest = randomForest(price~bathrooms+accommodates+cleaning_fee,data=train,*tune trees*)
+pred_forest = predict(*test set*)
+rmse_forest = sqrt(mean((pred_forest-scoringData$price)^2))
+rmse_forest
+*Graph Forest* 
+
+#Ranger #RMSE: 190.9052
+forest_ranger = ranger(price~cleaning_fee+accommodates+bathrooms,data=train,num.trees =
+1000)
+pred_ranger = predict(*training model, test set, and tune trees*)
+rmse_forest_ranger = sqrt(mean((pred_ranger$predictions-scoringData$price)^2))
+rmse_forest_ranger
+
+#Tuned Ranger #RMSE: 189.1483
+trControl=trainControl(method="cv",number=5) 
+tuneGrid = expand.grid(mtry=1:3,
+ splitrule = c('variance','extratrees','maxstat'),
+ min.node.size = c(2,5,10,15,20,25))
+set.seed(5656)
+cvModel = train(price~cleaning_fee+accommodates+bathrooms,
+ data=train,
+ method="algorithm",
+ *tune trees*,
+ trControl=trControl,
+ tuneGrid=tuneGrid )
+cv_forest_ranger = ranger(price~cleaning_fee+accommodates+bathrooms,
+ data=train,
+ *tune trees*,
+ mtry=cvModel$bestTune$mtry,
+ min.node.size = cvModel$bestTune$min.node.size,
+ splitrule = cvModel$bestTune$splitrule)
+pred_tuned = predict(*training model, test set, and tune trees*)
+rmse_cv_forest_ranger = sqrt(mean((pred_tuned$predictions-scoringData$price)^2))
+rmse_cv_forest_ranger
