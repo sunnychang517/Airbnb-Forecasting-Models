@@ -33,7 +33,7 @@ baseData <- bind_rows(train,test,scoringData)
 
 #Feature selection 
 subsets =
-leaps::regsubsets(price~*subset attributes*,data=train, nvmax=8) #best 5 predictors
+leaps::regsubsets(price~*subset attributes*,data=train, *# of best predictors*)
 summary(subsets)
 names(summary(subsets))
 
