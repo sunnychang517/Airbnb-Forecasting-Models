@@ -1,5 +1,5 @@
-analysisData = read.csv(*train dataset*, head = TRUE)
-scoringData = read.csv(file="test dataset*", head = TRUE)
+analysisData = read.csv(*train data set*, head = TRUE)
+scoringData = read.csv(file="test data set*", head = TRUE)
 namevector <- c("price")
 scoringData[,namevector] <- 0
 scoringData <- scoringData %>%
