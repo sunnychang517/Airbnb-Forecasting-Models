@@ -15,5 +15,5 @@ For this project, you are given a listing of over <strong>35,000</strong> Airbnb
 
 ## Acknowledgement: 
 This individual project was from my first programming class during my graduate studies back in 2021. </br>
-Professor: Grant Case
+
 
